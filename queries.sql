@@ -7,4 +7,4 @@ HAVING count(CASE WHEN sucesso = 1 THEN 1 END) < count(contador_login) - count(C
 SELECT userid
 FROM utilizador NATURAL JOIN login
 GROUP BY userid
-HAVING sum(sucesso = 1) < count(contador_login) - sum(sucesso = 1);
+HAVING sum(sucesso = 1) < count(contador_login) - sum(sucesso = 1); 
