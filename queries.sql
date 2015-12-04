@@ -36,22 +36,22 @@ WHERE utilizador.userid = pagina.userid AND
       reg_pag.regid = registo.regcounter AND
       reg_pag.typeid = registo.typecounter;
 
-CREATE TEMPORARY TABLE IF NOT EXISTS registos_do_user
+CREATE TEMPORARY TABLE IF NOT EXISTS registos_do_userlogin
 SELECT reg_pag.userid, reg_pag.regid, reg_pag.pageid
 FROM reg_pag, registo
 WHERE reg_pag.userid = registo.userid AND
       reg_pag.regid = registo.regcounter;
 
-SELECT rdu.regid, rdu.userid, rdu.pageid
+SELECT rdu.regid
 FROM registos_do_user rdu
-WHERE NOT EXISTS ( -- onde n existem pag do user que n tem esse registo
+WHERE NOT EXISTS ( -- onde nao existem pag do utilizador que nao tem esse registo
     SELECT pagecounter
     FROM pagina
     WHERE pagina.userid = rdu.userid AND
-          pagina.pagecounter NOT IN (
+          pagina.pagecounter NOT IN ( -- pagina do utilizador que nao esta associada ao registo rdu.regid
             SELECT pageid
             FROM reg_pag
-            WHERE reg_pag.userid = rdu.userid
+            WHERE reg_pag.regid = rdu.regid
             )
 );
 
