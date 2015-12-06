@@ -1,8 +1,8 @@
 <?php
 
-$dashboard = 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . '/dashboard.php';
-$logout = 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . '/logout.php';
-$login = 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . '/login.php';
+$dashboard = get_curr_dir() . '/dashboard.php';
+$logout = get_curr_dir() . '/logout.php';
+$login = get_curr_dir() . '/login.php';
 
 function is_logged_in(){
     require_once('startsession.php');
@@ -75,5 +75,13 @@ function get_user_id($email) {
     $dbh = null;
     
     return null;
+}
+
+function get_curr_dir() {
+    return 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']);
+}
+
+function generate_anchor($text, $link) {
+    return "<a href=\"{$link}\"> $text</a>";
 }
 ?>
