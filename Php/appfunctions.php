@@ -26,4 +26,54 @@ function redirect_to_login() {
     global $login;
     header('Location: ' . $login);
 }
+
+function log_login_attempt($userid, $success, $timestamp) {
+    /* exeption must be handled by caller */
+    $contador_login  = null;
+    
+    $dbh = get_database_handler();
+    // get largest contador_login in table "login"
+    $query = "SELECT contador_login FROM login ORDER BY contador_login DESC LIMIT 1";
+    $sth = $dbh->prepare($query);
+    $sth->execute();
+    
+    if ($sth->rowCount()){
+        // query successful
+        $row = $sth->fetch(PDO::FETCH_ASSOC);
+        $contador_login = $row['contador_login'] + 1; // increment max value by 1
+        error_log("CONTADOR_LOGIN:" . $contador_login);
+    }
+    
+    if($contador_login != null) {
+        $query = "INSERT INTO login (contador_login, userid, sucesso, moment) VALUES (?, ?, ?, ?);";
+        $sth = $dbh->prepare($query);
+        $sth->execute(array($contador_login, $userid, $success, $timestamp));
+        $dbh = null;
+    } else {
+        // something went wrong during first query
+        throw new PDOException('Could not query "login" table.');
+    }
+}
+
+/* Check if a user exists */
+function user_exists($email) {
+    /* exeption must be handled by caller */
+    return get_user_id($email) != null;
+}
+
+/* Gets user's ID based on email */
+function get_user_id($email) {
+    $dbh = get_database_handler();
+    $query = "SELECT userid FROM utilizador WHERE email=? LIMIT 1;";
+    $sth = $dbh->prepare($query);
+    $sth->execute(array($email));
+    if ($sth->rowCount()) {
+        $row = $sth->fetch(PDO::FETCH_ASSOC);
+        $dbh = null;
+        return $row['userid'];
+    }
+    $dbh = null;
+    
+    return null;
+}
 ?>
