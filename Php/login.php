@@ -15,7 +15,7 @@ if(!is_logged_in()) {
                 if ($_POST['username'] != '' && user_exists($_POST['username'])) {
                     // User is not logged in and tried to login
                     $dbh = get_database_handler();
-                    $query = 'SELECT userid, email FROM utilizador WHERE email=? AND password=? LIMIT 1;';
+                    $query = 'SELECT userid, email FROM utilizador WHERE email=? AND BINARY password=? LIMIT 1;';
                     $sth = $dbh->prepare($query);
                     $userid = null;
                     try {
@@ -67,7 +67,7 @@ if(!is_logged_in()) {
         <label for="user_username">Email:</label>
         <input type="text" id="username" name="username" value="<?php echo $username; ?>" /> <br />
         <label for="password">Password:</label>
-        <input type="text" id="password" name="password" />
+        <input type="password" id="password" name="password" />
         <input type="submit" name="submit" value="Log In" />
     </fieldset>
     </form>
