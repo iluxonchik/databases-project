@@ -1,8 +1,10 @@
 import sys, getopt, os
-
+class const:
+	folder_name="Php"
+	relative_path="../"
 def main(argv):
     
-    PHP_PATH = "../php/"
+    PHP_PATH = const.relative_path+const.folder_name+"/"
     CONNECTVARS_PATH = PHP_PATH + "connectvars.php"
     
     if len(argv) < 5:
@@ -40,7 +42,7 @@ def main(argv):
     if(not os.path.exists(PHP_PATH)):
         os.mkdir(PHP_PATH)
     
-    f = open("../php/connectvars.php", "w")
+    f = open(const.relative_path+const.folder_name+"/connectvars.php", "w")
     write_connectvars_file(f, dbHost, dbName, dbUser, dbPass)    
     f.close()
    
