@@ -3,6 +3,7 @@ require_once('appfunctions.php');
 
 if(is_logged_in()) {
     show_header();
+    echo '<h1> Paginas Ativas </h1>';
 } else {
     redirect_to_login();
 }
@@ -16,7 +17,7 @@ $viewpage_url = get_curr_dir() . "/viewpage.php?id=";
 $dbh = get_database_handler();
 $query = "SELECT utilizador.userid as userid, pagina.pagecounter as pagecounter, pagina.nome as nome
 FROM utilizador, pagina
-WHERE utilizador.userid = pagina.userid AND utilizador.userid=?;";
+WHERE utilizador.userid = pagina.userid AND utilizador.userid=? AND ativa = 1;";
 $sth = $dbh->prepare($query);
 try {
     $sth->execute(array($_SESSION['userid']));
@@ -27,6 +28,8 @@ try {
             ' | ' . generate_anchor('Remover', $remove_url . '&id=' .  $row['pagecounter']) . '</td></tr>';
         }
     }
+    
+  echo '<p> NOTA: remocao tambem funciona se uma pagina estiver inativa. Basta tirar "AND ativa = 1" da query para testar. </p>';
 } catch (PDOException $e) {
   echo('<p>ERROR: {' . $e->getMessage() . '}</p>');
 }
