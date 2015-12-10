@@ -1,5 +1,7 @@
 <?php
 
+define('TIMESTAMP_FORMAT', 'Y-m-d H:i:s');
+
 $dashboard = get_curr_dir() . '/dashboard.php';
 $logout = get_curr_dir() . '/logout.php';
 $login = get_curr_dir() . '/login.php';
@@ -77,11 +79,22 @@ function get_user_id($email) {
     return null;
 }
 
+function get_logged_in_userid() {
+    if(isset($_SESSION['userid'])) {
+        return $_SESSION['userid'];
+    }
+    return null;
+}
+
 function get_curr_dir() {
     return 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']);
 }
 
 function generate_anchor($text, $link) {
     return "<a href=\"{$link}\"> $text</a>";
+}
+
+function get_curr_timestamp() {
+    return date(TIMESTAMP_FORMAT);
 }
 ?>

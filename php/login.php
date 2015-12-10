@@ -3,8 +3,6 @@ require_once('startsession.php');
 require_once('connectvars.php');
 require_once('appfunctions.php');
 
-define('TIMESTAMP_FORMAT', 'Y-m-d H:i:s');
-
 if(!is_logged_in()) {
     
     if(!isset($username)) {
@@ -21,7 +19,7 @@ if(!is_logged_in()) {
                     try {
                         // not our fault, the provided database stores passwords in plain text
                         $sth->execute(array($_POST['username'], $_POST['password']));
-                        $login_timestamp = date(TIMESTAMP_FORMAT);
+                        $login_timestamp = get_curr_timestamp();
                         if($sth->rowCount()) {
                             // Login success
                             $row = $sth->fetch(PDO::FETCH_ASSOC);
@@ -64,7 +62,7 @@ if(!is_logged_in()) {
 ?>
     <form method = "post" action = "<?php echo $_SERVER['PHP_SELF']; ?>">
     <fieldset>
-        <label for="user_username">Email:</label>
+        <label for="username">Email:</label>
         <input type="text" id="username" name="username" value="<?php echo $username; ?>" /> <br />
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" />
