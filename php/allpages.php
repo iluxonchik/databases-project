@@ -1,15 +1,18 @@
 <?php 
+/*
+    Yes, this should be done inside pages.php, but we have less than 13hrs till deadline.
+*/
 require_once('appfunctions.php');
 
 if(is_logged_in()) {
     show_header();
-    echo '<h1> Paginas Ativas </h1>';
+    echo '<h1> Paginas Ativas E Inativas </h1>';
 } else {
     redirect_to_login();
 }
 $remove_url = get_curr_dir() . "/remove.php?type=1";
 $viewpage_url = get_curr_dir() . "/viewpage.php?id=";
-$allpages_url = get_curr_dir() . '/allpages.php';
+$activepages_url = get_curr_dir() . '/pages.php';
 ?>
 <p><a href="<?php echo get_curr_dir() . "/newpage.php" ?>">New Page</a>
 <table border="1">
@@ -18,7 +21,7 @@ $allpages_url = get_curr_dir() . '/allpages.php';
 $dbh = get_database_handler();
 $query = "SELECT utilizador.userid as userid, pagina.pagecounter as pagecounter, pagina.nome as nome
 FROM utilizador, pagina
-WHERE utilizador.userid = pagina.userid AND utilizador.userid=? AND ativa = 1;";
+WHERE utilizador.userid = pagina.userid AND utilizador.userid=?;";
 $sth = $dbh->prepare($query);
 try {
     $sth->execute(array($_SESSION['userid']));
@@ -30,7 +33,7 @@ try {
         }
     }
     
-  echo '<p> NOTA: remocao tambem funciona se uma pagina estiver inativa. <a href="' . $allpages_url . '">Clique aqui</a> para versao onde todas as paginas sao mostradas.</p>';
+  echo '<p> NOTA: a mostrar paginas ativas e inativas. <a href="' . $activepages_url . '">Clique aqui</a> para versao onde so as paginas ativas sao mostradas.</p>';
 } catch (PDOException $e) {
   echo('<p>ERROR: {' . $e->getMessage() . '}</p>');
 }
