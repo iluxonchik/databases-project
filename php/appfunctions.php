@@ -1,5 +1,7 @@
 <?php
 define('TIMESTAMP_FORMAT', 'Y-m-d H:i:s');
+define('TRANSACTION_START', 'START TRANSACTION');
+define('TRANSACTION_END', 'COMMIT');
 
 $dashboard = get_curr_dir() . '/dashboard.php';
 $logout = get_curr_dir() . '/logout.php';
@@ -106,5 +108,9 @@ function redirect_with_message($url, $msg, $delta = 1) {
 
 function get_prev_url() {
     return $_SERVER['HTTP_REFERER'];
+}
+
+function invert_int_bool($val) {
+    ($val == 0) ? 1 : 0;
 }
 ?>
