@@ -1,6 +1,7 @@
 <?php
-
 define('TIMESTAMP_FORMAT', 'Y-m-d H:i:s');
+define('TRANSACTION_START', 'START TRANSACTION');
+define('TRANSACTION_END', 'COMMIT');
 
 $dashboard = get_curr_dir() . '/dashboard.php';
 $logout = get_curr_dir() . '/logout.php';
@@ -96,5 +97,40 @@ function generate_anchor($text, $link) {
 
 function get_curr_timestamp() {
     return date(TIMESTAMP_FORMAT);
+}
+
+function redirect_with_message($url, $msg, $delta = 1) {
+     header( "refresh:" . $delta . ".;url=" . $url);
+     if ($msg != null) {
+         echo $msg;
+     }
+}
+
+function get_prev_url() {
+    if(isset($_SERVER['HTTP_REFERER'])) {
+        return $_SERVER['HTTP_REFERER'];
+    }
+    return $dashboard;
+}
+
+function invert_int_bool($val) {
+    ($val == 0) ? 1 : 0;
+}
+
+function get_max_pagina_pagecounter($dbh) {
+    $query = 'SELECT pagecounter FROM pagina ORDER BY pagecounter DESC LIMIT 1;';
+    $sth = $dbh->prepare($query);
+    $sth->execute();
+    if ($sth->rowCount()) {
+       $row = $sth->fetch(PDO::FETCH_ASSOC);
+       return $row['pagecounter']; 
+    } else {
+        return null; // empty table
+    }
+}
+
+function get_new_pagina_pagecounter($dbh) {
+    $new_pagecounter = get_max_pagina_pagecounter($dbh);
+    return ($new_pagecounter == null) ? 1 : $new_pagecounter + 1;
 }
 ?>
