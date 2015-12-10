@@ -9,7 +9,7 @@ if(is_logged_in()) {
 $remove_url = get_curr_dir() . "/remove.php?type=1";
 $viewpage_url = get_curr_dir() . "/viewpage.php?id=";
 ?>
-<p><a href="<?php echo get_curr_dir() . "/new.php?type=1" ?>">New Page</a>
+<p><a href="<?php echo get_curr_dir() . "/newpage.php" ?>">New Page</a>
 <table border="1">
 <th> Nome </th>
 <?php
