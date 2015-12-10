@@ -13,6 +13,8 @@ require_once('appfunctions.php');
 define('REDIRECT_DELTA', 3);
 define('REDIRECT_MSG', 'Redirecting to previous page... <a href="' . get_prev_url() . 
 '">Click here</a> if that doesen\'t happpen in ' . REDIRECT_DELTA . ' seconds.');
+define('SUCCESS_MSG', '<p> Page removed successfuly! </p>' . '<p>' . REDIRECT_MSG . '</p>');
+define('TYPE_ERR_MSG', '<p> ERROR: Type not set </p> <br />' . '<p>' . REDIRECT_MSG . '</p>');
 
 function insert_new_sequencia($dbh) {
     $query = 'SELECT contador_sequencia, userid FROM sequencia ORDER BY contador_sequencia DESC LIMIT 1;';
@@ -49,7 +51,7 @@ function clone_page($dbh, $id) {
     $query = 'INSERT INTO pagina(userid, pagecounter, nome, idseq, ativa, ppagecounter)
               VALUES (?, ?, ?, ?, ?, ?);';
     $sth = $dbh->prepare($query);
-    $new_pagecounter = $pagecounter + 1;
+    $new_pagecounter = get_new_pagina_pagecounter($dbh);
     $sth->execute(array($userid, $new_pagecounter, $nome, $idseq, 0, $ppagecounter));
     
     return array(
@@ -90,6 +92,7 @@ function handle_page_removal() {
     } else {
         
     }
+    redirect_with_message(get_prev_url(), SUCCESS_MSG, REDIRECT_DELTA);
 }
 
 function handle_reg_removal() {
@@ -104,8 +107,7 @@ if(is_logged_in()) {
     if (isset($_GET['type'])) {
         $type = $_GET['type'];
     } else {
-        $msg = '<p> ERROR: Type not set </p> <br />' . '<p>' . REDIRECT_MSG . '</p>';
-        redirect_with_message(get_prev_url(), $msg, REDIR_DELTA);
+        redirect_with_message(get_prev_url(), TYPE_ERR_MSG, REDIRECT_DELTA);
     }
     
     switch($type) {

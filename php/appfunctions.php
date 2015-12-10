@@ -116,4 +116,21 @@ function get_prev_url() {
 function invert_int_bool($val) {
     ($val == 0) ? 1 : 0;
 }
+
+function get_max_pagina_pagecounter($dbh) {
+    $query = 'SELECT pagecounter FROM pagina ORDER BY pagecounter DESC LIMIT 1;';
+    $sth = $dbh->prepare($query);
+    $sth->execute();
+    if ($sth->rowCount()) {
+       $row = $sth->fetch(PDO::FETCH_ASSOC);
+       return $row['pagecounter']; 
+    } else {
+        return null; // empty table
+    }
+}
+
+function get_new_pagina_pagecounter($dbh) {
+    $new_pagecounter = get_max_pagina_pagecounter($dbh);
+    return ($new_pagecounter == null) ? 1 : $new_pagecounter + 1;
+}
 ?>
