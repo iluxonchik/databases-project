@@ -1,5 +1,4 @@
 <?php
-
 define('TIMESTAMP_FORMAT', 'Y-m-d H:i:s');
 
 $dashboard = get_curr_dir() . '/dashboard.php';
@@ -96,5 +95,16 @@ function generate_anchor($text, $link) {
 
 function get_curr_timestamp() {
     return date(TIMESTAMP_FORMAT);
+}
+
+function redirect_with_message($url, $msg, $delta = 1) {
+     header( "refresh:" . $delta . ".;url=" . $url);
+     if ($msg != null) {
+         echo $msg;
+     }
+}
+
+function get_prev_url() {
+    return $_SERVER['HTTP_REFERER'];
 }
 ?>
