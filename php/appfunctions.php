@@ -107,7 +107,10 @@ function redirect_with_message($url, $msg, $delta = 1) {
 }
 
 function get_prev_url() {
-    return $_SERVER['HTTP_REFERER'];
+    if(isset($_SERVER['HTTP_REFERER'])) {
+        return $_SERVER['HTTP_REFERER'];
+    }
+    return $dashboard;
 }
 
 function invert_int_bool($val) {

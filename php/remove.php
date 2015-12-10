@@ -10,23 +10,27 @@ $_GET['type'] == 3 -> remove field registry type with registry
 **************************************************************/
 require_once('appfunctions.php');
 
-define('REDIR_DELTA', 3);
+define('REDIRECT_DELTA', 3);
 define('REDIRECT_MSG', 'Redirecting to previous page... <a href="' . get_prev_url() . 
-'">Click here</a> if that doesen\'t happpen in ' . REDIRECT_MSG . ' seconds.');
+'">Click here</a> if that doesen\'t happpen in ' . REDIRECT_DELTA . ' seconds.');
 
 function insert_new_sequencia($dbh) {
-    $query = 'SELECT contador_sequencia FROM sequencia ORDER BY contador_sequencia DESC LIMIT 1;';
+    $query = 'SELECT contador_sequencia, userid FROM sequencia ORDER BY contador_sequencia DESC LIMIT 1;';
     $sth = $dbh->prepare($query);
     $sth->execute();
     
     if ($sth->rowCount()) {
        $row = $sth->fetch(PDO::FETCH_ASSOC);
-       return $row['contador_sequencia'] + 1;
+       $new_contador_sequencia = $row['contador_sequencia'] + 1;
+       $query = 'INSERT INTO sequencia (contador_sequencia, moment, userid) VALUES (?, ?, ?);';
+       $sth = $dbh->prepare($query);
+       $sth->execute(array($new_contador_sequencia, get_curr_timestamp(), $row['userid']));
+       return $new_contador_sequencia;
     }
     return null;
 }
 
-function clone_page($dbh) {
+function clone_page($dbh, $id) {
     $orig_idseq = null;
     // Get values to clone
     $query = 'SELECT userid, pagecounter, nome, idseq, ativa, ppagecounter FROM pagina
@@ -56,12 +60,12 @@ function clone_page($dbh) {
     );
 }
 
-function update_page_info($params) {
+function update_page_info($dbh, $params) {
     $idseq = insert_new_sequencia($dbh);
     if ($idseq == null) {
         $idseq = 1;
     }
-    $query = 'UPDATE TABLE pagina
+    $query = 'UPDATE pagina
               SET idseq = ?, ativa = ?, ppagecounter = ?
               WHERE pagecounter = ? AND userid = ?;';
     $sth = $dbh->prepare($query);
@@ -75,7 +79,7 @@ function handle_page_removal() {
        $dbh = get_database_handler();
        try {
            $dbh->query(TRANSACTION_START);
-           $params = clone_page($dbh);
+           $params = clone_page($dbh, $id);
            update_page_info($dbh, $params);
            $dbh->query(TRANSACTION_END);
 
