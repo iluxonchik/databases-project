@@ -4,7 +4,7 @@ Used for general removal of stuff, based on $_GET['type']
 
 $_GET['type'] == 1 -> remove page with id $_GET['id']
 $_GET['type'] == 2 -> remove registry type with id $_GET['id']
-$_GET['type'] == 3 -> remove field registry type with registry
+$_GET['type'] == 3 -> remove field registry type with registry     //// WTF?
     type id $_GET['id'] and field if $_GET['id_field']
 
 **************************************************************/
@@ -14,6 +14,7 @@ define('REDIRECT_DELTA', 3);
 define('REDIRECT_MSG', 'Redirecting to previous page... <a href="' . get_prev_url() .
 '">Click here</a> if that doesen\'t happpen in ' . REDIRECT_DELTA . ' seconds.');
 define('SUCCESS_MSG', '<p> Page removed successfuly! </p>' . '<p>' . REDIRECT_MSG . '</p>');
+define('SUCCESS_MSG_REG_TYPE', '<p> Registry type removed successfuly! </p>' . '<p>' . REDIRECT_MSG . '</p>');
 define('TYPE_ERR_MSG', '<p> ERROR: Type not set </p> <br />' . '<p>' . REDIRECT_MSG . '</p>');
 
 function insert_new_sequencia($dbh) {
@@ -75,6 +76,19 @@ function update_page_info($dbh, $params) {
     $params['pagecounter'], $params['userid']));
 }
 
+function update_reg_type_info($dbh, $params) {
+    $idseq = insert_new_sequencia($dbh);
+    if ($idseq == null) {
+        $idseq = 1;
+    }
+    $query = 'UPDATE tipo_registo
+              SET idseq = ?, ativo = ?, ptypecnt = ?
+              WHERE typecnt = ? AND userid = ?;';
+    $sth = $dbh->prepare($query);
+    $sth->execute(array($idseq, 0, $params['ptypecnt'],
+    $params['typecnt'], $params['userid']));
+}
+
 function handle_page_removal() {
     if(isset($_GET['id'])) {
        $id = $_GET['id'];
@@ -99,8 +113,54 @@ function handle_reg_removal() {
     // TODO
 }
 
+
+function clone_reg_type($dbh, $id) {
+    $orig_idseq = null;
+    // Get values to clone
+    $query = 'SELECT userid, typecnt, nome, ativo, idseq, ptypecnt FROM tipo_registo
+            WHERE userid = ? AND typecnt = ? LIMIT 1;';
+    $sth = $dbh->prepare($query);
+    $sth->execute(array(get_logged_in_userid(), $id));
+    if($sth->rowCount()) {
+        $row = $sth->fetch(PDO::FETCH_ASSOC);
+        $userid = $row['userid'];
+        $typecnt = $row['typecnt'];
+        $nome = $row['nome'];
+        $ativo = $row['ativo'];
+        $orig_idseq = $idseq = $row['idseq'];
+        $ptypecnt = $row['ptypecnt'];
+    }
+    $query = 'INSERT INTO tipo_registo (userid, typecnt, nome, ativo, idseq, ptypecnt) VALUES (?, ?, ?, ?, ?, ?);';
+    $sth = $dbh->prepare($query);
+    $new_typecnt = get_new_reg_type_typecnt($dbh);
+    $sth->execute(array($userid, $new_typecnt, $nome, 0, $idseq, $ptypecnt));
+
+    return array(
+        'userid' => $userid,
+        'typecnt' => $typecnt,
+        'ativo' => $ativo, // TODO: null check
+        'ptypecnt' => $new_typecnt
+    );
+}
+
 function handle_reg_type_removal() {
-    // TODO
+    if(isset($_GET['id'])) {
+       $id = $_GET['id'];
+       $dbh = get_database_handler();
+       try {
+           $dbh->beginTransaction();
+           $params = clone_reg_type($dbh, $id);
+           update_reg_type_info($dbh, $params);
+           $dbh->commit();
+
+       } catch (PDOException $e) {
+            echo('<p>ERROR: {' . $e->getMessage() . '}</p>');
+       }
+       $dbh = null;
+    } else {
+
+    }
+    redirect_with_message(get_prev_url(), SUCCESS_MSG_REG_TYPE, REDIRECT_DELTA);
 }
 
 if(is_logged_in()) {
@@ -116,12 +176,12 @@ if(is_logged_in()) {
             handle_page_removal();
             break;
         case 2:
-            // Remove registry
-            handle_reg_removal();
+            // Remove registry trype
+            handle_reg_type_removal();
             break;
         case 3:
-            // Remove field registry type
-            handle_reg_field_removal();
+            // Remove field registry type    WTF?
+            handle_reg_field_removal(); //    WTF?
             break;
     }
 
