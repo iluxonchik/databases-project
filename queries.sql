@@ -57,16 +57,20 @@ WHERE NOT EXISTS ( -- onde nao existem pag do utilizador que nao tem esse regist
 
 # DATA WAREHOUSE
 
+#d utilizador(email, nome, pa´ıs, categoria)
 #debug, don't include in final
+SET FOREIGN_KEY_CHECKS=0;
 DROP TABLE IF EXISTS facts_login;
 DROP TABLE IF EXISTS d_utilizador;
 DROP TABLE IF EXISTS d_tempo;
+SET FOREIGN_KEY_CHECKS=1;
+
 #end debug
 
 CREATE TABLE IF NOT EXISTS facts_login(
   userid INT NOT NULL,
     timeid INT NOT NULL,
-    sucesso TINYINT(1) NOT NULL,
+    num_login_attempts INT NOT NULL,
 PRIMARY KEY (userid, timeid)
 );
 
@@ -76,7 +80,7 @@ CREATE TABLE IF NOT EXISTS d_tempo(
     mes INT NOT NULL,
     ano INT NOT NULL,
 PRIMARY KEY(timeid),
-FOREIGN KEY (timeid) REFERENCES facts_login(timeid)
+FOREIGN KEY (timeid) REFERENCES facts_login(timeid) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS d_utilizador(
@@ -86,22 +90,23 @@ CREATE TABLE IF NOT EXISTS d_utilizador(
     pais VARCHAR(45) NOT NULL,
     categoria VARCHAR(45) NOT NULL,
 PRIMARY KEY (userid),
-FOREIGN KEY (userid) REFERENCES facts_login(userid)
+FOREIGN KEY (userid) REFERENCES facts_login(userid) ON DELETE CASCADE
 );
 
-INSERT INTO facts_login(userid, timeid, sucesso)
-SELECT utilizador.userid, login.contador_login, login.sucesso
+INSERT INTO facts_login(userid, timeid, num_login_attempts)
+SELECT utilizador.userid, login.contador_login, count(login.moment)
+FROM utilizador, login
+WHERE utilizador.userid = login.userid
+GROUP BY DAY(moment) * YEAR(moment);
+
+INSERT INTO d_utilizador(userid, email, nome, pais, categoria)
+SELECT DISTINCT utilizador.userid, utilizador.email, utilizador.nome, utilizador.pais, utilizador.categoria
 FROM utilizador, login
 WHERE utilizador.userid = login.userid;
 
-INSERT INTO d_utilizador(userid, email, nome, pais, categoria)
-SELECT utilizador.userid, utilizador.email, utilizador.nome, utilizador.pais, utilizador.categoria
-FROM utilizador;
-
 INSERT INTO d_tempo (timeid, dia, mes, ano)
-SELECT contador_login, DAY(moment), MONTH(moment), YEAR(moment)
+SELECT contador_login, DAYOFYEAR(moment) * YEAR(moment), MONTH(moment)*YEAR(moment), YEAR(moment)
 FROM login;
-
 # Misc Queries
 -- Quais sao as paginas sem registos?
 SELECT pagina.pagecounter
