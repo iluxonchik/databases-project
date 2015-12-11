@@ -1,7 +1,6 @@
 <?php
 define('TIMESTAMP_FORMAT', 'Y-m-d H:i:s');
-define('TRANSACTION_START', 'START TRANSACTION');
-define('TRANSACTION_END', 'COMMIT');
+
 
 $dashboard = get_curr_dir() . '/dashboard.php';
 $logout = get_curr_dir() . '/logout.php';
@@ -15,14 +14,15 @@ function is_logged_in(){
 /* Get database handler */
 function get_database_handler() {
     require_once('connectvars.php');
-    return new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER,  DB_PASSWORD, 
+    return new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER,  DB_PASSWORD,
                                                     array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 }
 
 function show_header() {
     global $dashboard, $logout;
-    echo '<p>Logged in as ' . $_SESSION['username'] . 
+    echo '<p>Logged in as ' . $_SESSION['username'] .
     ' <a href=" ' . $dashboard . '"> Dashboard</a> | <a href = ' . $logout . '>Logout</a> <br/>';
+    echo '<br/>';
 }
 
 function redirect_to_login() {
@@ -33,22 +33,22 @@ function redirect_to_login() {
 function log_login_attempt($userid, $success, $timestamp) {
     /* exeption must be handled by caller */
     $contador_login  = null;
-    
+
     $dbh = get_database_handler();
     // get largest contador_login in table "login"
     $query = "SELECT contador_login FROM login ORDER BY contador_login DESC LIMIT 1";
     $sth = $dbh->prepare($query);
-    $dbh->query(TRANSACTION_START);
+    $dbh->beginTransaction();
     $sth->execute();
-    $dbh->query(TRANSACTION_END);
-    
+    $dbh->commit();
+
     if ($sth->rowCount()){
         // query successful
         $row = $sth->fetch(PDO::FETCH_ASSOC);
         $contador_login = $row['contador_login'] + 1; // increment max value by 1
         error_log("CONTADOR_LOGIN:" . $contador_login);
     }
-    
+
     if($contador_login != null) {
         $query = "INSERT INTO login (contador_login, userid, sucesso, moment) VALUES (?, ?, ?, ?);";
         $sth = $dbh->prepare($query);
@@ -78,7 +78,7 @@ function get_user_id($email) {
         return $row['userid'];
     }
     $dbh = null;
-    
+
     return null;
 }
 
@@ -125,7 +125,7 @@ function get_max_pagina_pagecounter($dbh) {
     $sth->execute();
     if ($sth->rowCount()) {
        $row = $sth->fetch(PDO::FETCH_ASSOC);
-       return $row['pagecounter']; 
+       return $row['pagecounter'];
     } else {
         return null; // empty table
     }
@@ -142,7 +142,7 @@ function get_max_seq_counter($dbh) {
     $sth->execute();
     if ($sth->rowCount()) {
        $row = $sth->fetch(PDO::FETCH_ASSOC);
-       return $row['contador_sequencia']; 
+       return $row['contador_sequencia'];
     } else {
         return null; // empty table
     }

@@ -11,7 +11,7 @@ $_GET['type'] == 3 -> remove field registry type with registry
 require_once('appfunctions.php');
 
 define('REDIRECT_DELTA', 3);
-define('REDIRECT_MSG', 'Redirecting to previous page... <a href="' . get_prev_url() . 
+define('REDIRECT_MSG', 'Redirecting to previous page... <a href="' . get_prev_url() .
 '">Click here</a> if that doesen\'t happpen in ' . REDIRECT_DELTA . ' seconds.');
 define('SUCCESS_MSG', '<p> Page removed successfuly! </p>' . '<p>' . REDIRECT_MSG . '</p>');
 define('TYPE_ERR_MSG', '<p> ERROR: Type not set </p> <br />' . '<p>' . REDIRECT_MSG . '</p>');
@@ -20,7 +20,7 @@ function insert_new_sequencia($dbh) {
     $query = 'SELECT contador_sequencia, userid FROM sequencia ORDER BY contador_sequencia DESC LIMIT 1;';
     $sth = $dbh->prepare($query);
     $sth->execute();
-    
+
     if ($sth->rowCount()) {
        $row = $sth->fetch(PDO::FETCH_ASSOC);
        $new_contador_sequencia = $row['contador_sequencia'] + 1;
@@ -53,7 +53,7 @@ function clone_page($dbh, $id) {
     $sth = $dbh->prepare($query);
     $new_pagecounter = get_new_pagina_pagecounter($dbh);
     $sth->execute(array($userid, $new_pagecounter, $nome, $idseq, 0, $ppagecounter));
-    
+
     return array(
         'userid' => $userid,
         'pagecounter' => $pagecounter,
@@ -71,7 +71,7 @@ function update_page_info($dbh, $params) {
               SET idseq = ?, ativa = ?, ppagecounter = ?
               WHERE pagecounter = ? AND userid = ?;';
     $sth = $dbh->prepare($query);
-    $sth->execute(array($idseq, 0, $params['ppagecounter'], 
+    $sth->execute(array($idseq, 0, $params['ppagecounter'],
     $params['pagecounter'], $params['userid']));
 }
 
@@ -80,17 +80,17 @@ function handle_page_removal() {
        $id = $_GET['id'];
        $dbh = get_database_handler();
        try {
-           $dbh->query(TRANSACTION_START);
+           $dbh->beginTransaction();
            $params = clone_page($dbh, $id);
            update_page_info($dbh, $params);
-           $dbh->query(TRANSACTION_END);
+           $dbh->commit();
 
        } catch (PDOException $e) {
             echo('<p>ERROR: {' . $e->getMessage() . '}</p>');
        }
        $dbh = null;
     } else {
-        
+
     }
     redirect_with_message(get_prev_url(), SUCCESS_MSG, REDIRECT_DELTA);
 }
@@ -109,7 +109,7 @@ if(is_logged_in()) {
     } else {
         redirect_with_message(get_prev_url(), TYPE_ERR_MSG, REDIRECT_DELTA);
     }
-    
+
     switch($type) {
         case 1:
             // Remove page
@@ -124,7 +124,7 @@ if(is_logged_in()) {
             handle_reg_field_removal();
             break;
     }
-    
+
 } else {
     redirect_to_login();
 }
