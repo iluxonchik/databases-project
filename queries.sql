@@ -117,7 +117,7 @@ FROM d_utilizador, d_tempo, facts_login
 WHERE d_utilizador.userid = facts_login.userid AND
       d_tempo.timeid = facts_login.timeid AND
       d_utilizador.pais = "Portugal"
-GROUP BY ROLLUP(d_tempo.mes, d_tempo.ano); 
+GROUP BY d_tempo.ano, d_tempo.mes with ROLLUP;
 
 # Misc Queries
 -- Quais sao as paginas sem registos?
