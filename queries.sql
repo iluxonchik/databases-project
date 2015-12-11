@@ -1,61 +1,29 @@
-DROP TRIGGER IF EXISTS valor_trigger;
-DROP TRIGGER IF EXISTS type_reg_trigger;
-DROP TRIGGER IF EXISTS pagina_trigger;
-DROP TRIGGER IF EXISTS campo_trigger;
-DROP TRIGGER IF EXISTS reg_trigger;
-DROP PROCEDURE IF EXISTS checkvalue;
-
-Delimiter ///
-CREATE PROCEDURE checkvalue (valor INT)
-BEGIN
- IF valor IN (
- SELECT tipo_registo.idseq, pagina.idseq, campo.idseq, registo.idseq, valor.idseq
-  FROM tipo_registo, pagina, campo, registo, valor)
- THEN CALL daerro();
- END IF ;
-END ///
-Delimiter ;
-
-
-Delimiter ///
-CREATE TRIGGER pagina_trigger BEFORE INSERT ON pagina
-FOR EACH ROW
-BEGIN
- call checkvalue(NEW.idseq);
-END; ///
-Delimiter ;
-
-Delimiter ///
-CREATE TRIGGER type_reg_trigger BEFORE INSERT ON tipo_registo
-FOR EACH ROW
-BEGIN
- call checkvalue(NEW.idseq);
-END; ///
-Delimiter ;
-
-
-
-Delimiter ///
-CREATE TRIGGER campo_trigger BEFORE INSERT ON campo
-FOR EACH ROW
-BEGIN
- call checkvalue(NEW.idseq);
-END; ///
-Delimiter ;
-
-
-Delimiter ///
-CREATE TRIGGER valor_trigger BEFORE INSERT ON valor
-FOR EACH ROW
-BEGIN
- call checkvalue(NEW.idseq);
-END; ///
-Delimiter ;
-
-Delimiter ///
-CREATE TRIGGER reg_trigger BEFORE INSERT ON registo
-FOR EACH ROW
-BEGIN
- call checkvalue(NEW.idseq);
-END; ///
-Delimiter ;
+SELECT userid
+FROM (SELECT userid, AVG(n_registos) as media FROM
+          (SELECT reg_pag.userid, COUNT(reg_pag.regid) AS n_registos
+          FROM reg_pag INNER JOIN registo INNER JOIN tipo_registo INNER JOIN pagina
+          WHERE reg_pag.pageid = pagina.pagecounter
+          AND tipo_registo.typecnt = registo.typecounter
+                  AND reg_pag.regid = registo.regcounter
+          AND registo.ativo = 1
+          AND reg_pag.ativa = 1
+AND pagina.ativa = 1
+AND tipo_registo.ativo = 1
+          GROUP BY reg_pag.pageid) AS TOTAL_REG_BY_USER
+     GROUP BY userid) AS MEAN_BY_USER
+WHERE media = (
+     SELECT MAX(media)
+    FROM
+          (SELECT AVG(n_registos) as media FROM
+               (SELECT reg_pag.userid, COUNT(reg_pag.regid) AS n_registos
+          FROM reg_pag INNER JOIN registo INNER JOIN tipo_registo INNER JOIN pagina
+          WHERE reg_pag.pageid = pagina.pagecounter
+          AND tipo_registo.typecnt = registo.typecounter
+                  AND reg_pag.regid = registo.regcounter
+          AND registo.ativo = 1
+          AND reg_pag.ativa = 1
+AND pagina.ativa = 1
+AND tipo_registo.ativo = 1
+          GROUP BY reg_pag.pageid) AS TOTAL_REG
+          GROUP BY userid
+          ORDER BY media DESC) AS MEAN_BY_USER)
