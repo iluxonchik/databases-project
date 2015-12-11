@@ -63,12 +63,20 @@ DROP TABLE IF EXISTS d_utilizador;
 DROP TABLE IF EXISTS d_tempo;
 #end debug
 
+CREATE TABLE IF NOT EXISTS facts_login(
+  userid INT NOT NULL,
+    timeid INT NOT NULL,
+    sucesso TINYINT(1) NOT NULL,
+PRIMARY KEY (userid, timeid)
+);
+
 CREATE TABLE IF NOT EXISTS d_tempo(
   timeid INT NOT NULL AUTO_INCREMENT,
     dia INT NOT NULL,
     mes INT NOT NULL,
     ano INT NOT NULL,
-PRIMARY KEY(timeid)
+PRIMARY KEY(timeid),
+FOREIGN KEY (timeid) REFERENCES facts_login(timeid)
 );
 
 CREATE TABLE IF NOT EXISTS d_utilizador(
@@ -77,15 +85,21 @@ CREATE TABLE IF NOT EXISTS d_utilizador(
     nome VARCHAR(255) NOT NULL,
     pais VARCHAR(45) NOT NULL,
     categoria VARCHAR(45) NOT NULL,
-PRIMARY KEY (userid)
+PRIMARY KEY (userid),
+FOREIGN KEY (userid) REFERENCES facts_login(userid)
 );
+
+INSERT INTO facts_login(userid, timeid, sucesso)
+SELECT utilizador.userid, login.contador_login, login.sucesso
+FROM utilizador, login
+WHERE utilizador.userid = login.userid;
 
 INSERT INTO d_utilizador(userid, email, nome, pais, categoria)
 SELECT utilizador.userid, utilizador.email, utilizador.nome, utilizador.pais, utilizador.categoria
 FROM utilizador;
 
-INSERT INTO d_tempo (dia, mes, ano)
-SELECT DAY(moment), MONTH(moment), YEAR(moment)
+INSERT INTO d_tempo (timeid, dia, mes, ano)
+SELECT contador_login, DAY(moment), MONTH(moment), YEAR(moment)
 FROM login;
 
 # Misc Queries
