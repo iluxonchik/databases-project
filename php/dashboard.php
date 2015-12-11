@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once('appfunctions.php');
 
 if(is_logged_in()) {
@@ -18,3 +18,6 @@ if(is_logged_in()) {
 <a href="insert_registry.php"> Insert new registry</a> <br/>
 <a href="viewpage.php"> Open page</a> <br/>
 <a href="allpages.php"> Pages</a> <br/>
+
+
+<a href="newregtype.php"> Insert new registry type</a> <br/>
