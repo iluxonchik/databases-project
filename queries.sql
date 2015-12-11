@@ -112,7 +112,7 @@ WHERE utilizador.userid = login.userid
 GROUP BY DAY(moment) * YEAR(moment);
 
 # Warehouse ROLLUP Query
-SELECT d_utilizador.categoria, d_tempo.mes, d_tempo.ano, d_utilizador.pais, avg(num_login_attempts) as avg_login_attempts
+SELECT d_utilizador.categoria, d_tempo.ano, d_tempo.mes, d_utilizador.pais, avg(num_login_attempts) as avg_login_attempts
 FROM d_utilizador, d_tempo, facts_login
 WHERE d_utilizador.userid = facts_login.userid AND
       d_tempo.timeid = facts_login.timeid AND
