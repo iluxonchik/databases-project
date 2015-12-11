@@ -8,14 +8,14 @@ if(is_logged_in()) {
     redirect_to_login();
 }
 $remove_url = get_curr_dir() . "/remove.php?type=2"; // expects id=...
-$viewregtype_url = get_curr_dir() . "/viewregtype.php?id=";
+$viewregtype_url = get_curr_dir() . "/viewregtype.php?typecnt=";
 
 
 ?>
 <p><a href="newregtype.php">Criar tipo de registo</a>
 
 <table border="1">
-<tr> <th>Nome</th> <th></th>  </tr>
+<tr> <th>Nome</th> <th></th>  <th></th>  </tr>
 <?php
 $dbh = get_database_handler();
 $query = "SELECT tipo_registo.userid as userid, tipo_registo.typecnt as typecnt, tipo_registo.nome as nome
@@ -27,8 +27,8 @@ try {
     if ($sth->rowCount()) {
         $rows = $sth->fetchAll(PDO::FETCH_ASSOC);
         foreach($rows as $row) {
-            echo '<tr><td>' . $row['nome'] .' </td><td> ' ./*  generate_anchor('Abrir', $viewregtype_url . $row['typecnt']) .
-            ' | ' .*/ generate_anchor('Remover', $remove_url . '&id=' .  $row['typecnt']) . '</td></tr>';
+            echo '<tr><td>' . $row['nome'] .' </td><td> ' .  generate_anchor('Abrir', $viewregtype_url . $row['typecnt']) .
+            ' </td><td> ' . generate_anchor('Remover', $remove_url . '&id=' .  $row['typecnt']) . '</td></tr>';
         }
     }
 

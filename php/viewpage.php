@@ -15,6 +15,7 @@ View page with page id $_GET['id'] with its registries
 /*****************************************************/
 	if(isset($_REQUEST['pageid'])){
 		$dbh=get_database_handler();
+        $dbh->beginTransaction();
 		$query = 'SELECT r.nome,rp.regid,rp.pageid,rp.userid from reg_pag rp,registo r where rp.pageid=? group by rp.regid';
 		$sth= $dbh->prepare($query);
 		try{
@@ -26,7 +27,7 @@ View page with page id $_GET['id'] with its registries
 		echo("<td>pageid</td>");
 		echo("<td>Nome de registo</td>");
 		echo("</tr>\n");
-		
+
 		foreach($sth as $row)
  		{
 		 if($row['userid']  == $_SESSION['userid']){
@@ -40,7 +41,7 @@ View page with page id $_GET['id'] with its registries
 			}
  		}
 		 echo("</table>\n");
-		
+		$dbh->commit();
 		}
 		catch(PDOException $e){
 			echo("<p>ERROR: {$e->getMessage()}</p>");
@@ -48,19 +49,19 @@ View page with page id $_GET['id'] with its registries
 	if(isset($db)){
 		$dbh=null;
 	}
-		
+
 	}
 
 	else{
-?>		
+?>
     <form method = "post" action = "<?php echo $_SERVER['PHP_SELF']; ?>">
     <fieldset>
         <input type="text" id="username" name="pageid" value="pageid" /> <br />
         <input type="submit" name="submit" value="Submit" />
     </fieldset>
     </form>
-		
-		
+
+
 <?php	}
 
 ?>
