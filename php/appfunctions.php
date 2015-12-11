@@ -132,7 +132,25 @@ function get_max_pagina_pagecounter($dbh) {
 }
 
 function get_new_pagina_pagecounter($dbh) {
-    $new_pagecounter = get_max_pagina_pagecounter($dbh);
-    return ($new_pagecounter == null) ? 1 : $new_pagecounter + 1;
+    $new_seqcounter = get_max_pagina_pagecounter($dbh);
+    return ($new_seqcounter == null) ? 1 : $new_seqcounter + 1;
 }
+
+function get_max_seq_counter($dbh) {
+    $query = 'SELECT contador_sequencia FROM sequencia ORDER BY contador_sequencia DESC LIMIT 1;';
+    $sth = $dbh->prepare($query);
+    $sth->execute();
+    if ($sth->rowCount()) {
+       $row = $sth->fetch(PDO::FETCH_ASSOC);
+       return $row['contador_sequencia']; 
+    } else {
+        return null; // empty table
+    }
+}
+
+function get_new_seq_counter($dbh) {
+    $new_seqcounter = get_max_seq_counter($dbh);
+    return ($new_seqcounter == null) ? 1 : $new_seqcounter + 1;
+}
+
 ?>
