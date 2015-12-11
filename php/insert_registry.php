@@ -1,69 +1,86 @@
 <?php
+/*************************************************************
+Insert new registry
+**************************************************************/
 require_once('appfunctions.php');
+require_once('startsession.php');
+require_once('connectvars.php');
 
-if(is_logged_in()) {
+function parse_is_active() {
+    $is_active = 1; // default value
+    if (isset($_POST['is_active'])) {
+            $is_active = intval($_POST['is_active']);
+            // Make sure the value is either 1 or 0
+            $is_active = ($is_active == 0 || $is_active == 1) ? $is_active : 1;
+    }
+    return $is_active;
+}
+
+function update_register_table($dbh, $reg_name, $cnt_seq, $is_active, $typecont) {
+    $query = "SELECT regcounter FROM registo ORDER BY regcounter DESC LIMIT 1;";
+    $sth = $dbh->prepare($query);
+    $sth->execute();
+    if($sth->rowCount()) {
+        $row = $sth->fetch(PDO::FETCH_ASSOC);
+        $reg_cnt = $row['regcounter'] + 1;
+    } else {
+        // Table is empty, use id 1
+        $reg_cnt = 1;
+    }
+    $query = "INSERT INTO registo (userid,typecounter, regcounter, nome, idseq, ativo) VALUES (?,?, ?, ?, ?, 1);";
+    $sth = $dbh->prepare($query);
+    $sth->execute(array(get_logged_in_userid(),$typecont, $reg_cnt, $reg_name , $cnt_seq));
+}
+
+
+
+
+
+if (is_logged_in()) {
     show_header();
+    
+    if(isset($_POST['typecnt']) && isset($_POST['register_name'])) {
+        $register_name = $_POST['register_name'];
+        $typecnt=$_POST['typecnt'];
+        $dbh = get_database_handler();
+        try {
+            //$dbh->query(TRANSACTION_START);
+            $cnt_seq = update_sequencia_table($dbh);
+            update_register_table($dbh, $register_name, $cnt_seq, 1,$typecnt);
+            //$dbh->query(TRANSACTION_END);       
+        } catch (PDOException $e) {
+            echo('<p>ERROR: {' . $e->getMessage() . '}</p>');
+        }
+ 
+        $dbh = null; 
+        
+    }
+    else{
+?>
+
+<p> Insert new register </p>
+<form method = "post" action = "<?php echo $_SERVER['PHP_SELF']; ?>">
+Register type:<br><select name="typecnt">
+	<?php    
+		$dbh=get_database_handler();
+		$query='SELECT typecnt,nome FROM tipo_registo WHERE userid=?;';
+		$result=$dbh->prepare($query);
+		$result->execute(array(get_logged_in_userid()));
+		foreach($result as $option){
+			echo("<option value=".$option['typecnt'].">".$option['nome']."</option>");
+		}
+	?>
+</select>
+<fieldset>
+    <label for="page_name">Register name:</label>
+    <input type="text" id="register_name" name="register_name" value="" /> <br />
+    <input type="submit" name="submit" value="Add Register" />
+</fieldset>
+</form>
+ 
+<?php
+	}
 } else {
     redirect_to_login();
 }
-?>
-
-
-<?php
-/******************************************************
-Create registry with pageid(page to enter registry)  name
-/*****************************************************/
-	if(isset($_REQUEST['pageid']) && isset($_REQUEST['reg_name'])){
-		$dbh=get_database_handler();
-		$query = 'SELECT userid FROM reg_pag WHERE pageid=?';
-		$sth= $dbh->prepare($query);
-		try{
-			$sth->execute(array($_POST['pageid']));
-			 
-			 if($sth['userid'] == $_SESSION['userid']){
-				$nextTypeCounter=$dbh->query('SELECT typecnt FROM tipo_registo ORDER BY typecnt DESC LIMIT 1')['typecnt']+1;
-				$nextRegCounter=$dbh->query('SELECT regcounter FROM registo ORDER BY regcounter DESC LIMIT 1')['regcounter']+1;
-				$nextSeqCounter=$dbh->query('SELECT contador_sequencia FROM sequencia ORDER BY contador_sequencia DESC LIMIT 1')['contador_sequencia']+1;
-				$query='INSERT INTO registo(userid,typecounter,regcounter,nome,ativo,idseq,pregcounter)
-						values(?,?,?,?,1,?,NULL)';
-				echo ($query);
-				$sth=$dbh->prepare($query);
-				$sth->execute(array($_REQUEST["userid"],$nextTypeCounter,$regcounter,$_REQUEST["name"],$nextSeqCounter));
-				
-				echo("<table border=\"0\" cellspacing=\"5\">\n");
-				echo("<tr>\n");
-				//echo("<td>idregpag</td>");
-				//echo("<td>userid</td>");
-				echo("<td>regid</td>");
-				echo("<td>pageid</td>");
-				echo("</tr>\n");
-				
-				}
-				else{
-					echo ("Permission denied accessing page " $_REQUEST['pageid']); 
-				}
-			}
-			catch(PDOException $e){
-				echo("<p>ERROR: {$e->getMessage()}</p>");
-			}
-		if(isset($db)){
-			$dbh=null;
-		}
-				
-	}
-
-	else{
-?>		
-    <form method = "post" action = "<?php echo $_SERVER['PHP_SELF']; ?>">
-    <fieldset>
-		Page to insert:<input type="text" id="pageid" name="pageid" value="pageid" /> <br />
-        Registry name:<input type="text" id="reg_name" name="reg_name" value="reg_name" /> <br />
-        Registry type:<input type="text" id="reg_type" name="reg_type" value="reg_type" /> <br />
-        <input type="submit" name="submit" value="Submit" />
-    </fieldset>
-    </form>
-		
-		
-<?php	}
-
 ?>

@@ -8,7 +8,7 @@ if(is_logged_in()) {
     redirect_to_login();
 }
 $remove_url = get_curr_dir() . "/remove.php?type=1";
-$viewpage_url = get_curr_dir() . "/viewpage.php?id=";
+$viewpage_url = get_curr_dir() . "/viewpage.php?pageid=";
 $allpages_url = get_curr_dir() . '/allpages.php';
 ?>
 <p><a href="<?php echo get_curr_dir() . "/newpage.php" ?>">New Page</a>

@@ -10,7 +10,7 @@ if(is_logged_in()) {
 
 <!-- Just a template, do actual design -->
 <a href="newpage.php"> Insert new page</a> <br/>
-<a href="#"> Insert new registry</a> <br/>
+<a href="new_registry.php"> Insert new registry</a> <br/>
 <a href="view_registry_types.php"> Registry types</a> <br/>
 <a href="#"> Insert new fields for registry </a> <br/>
 <a href="pages.php"> Remove page</a> <br/>
