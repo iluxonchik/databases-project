@@ -55,6 +55,38 @@ WHERE NOT EXISTS ( -- onde nao existem pag do utilizador que nao tem esse regist
             )
 );
 
+# DATA WAREHOUSE
+
+#debug, don't include in final
+DROP TABLE IF EXISTS facts_login;
+DROP TABLE IF EXISTS d_utilizador;
+DROP TABLE IF EXISTS d_tempo;
+#end debug
+
+CREATE TABLE IF NOT EXISTS d_tempo(
+  timeid INT NOT NULL AUTO_INCREMENT,
+    dia INT NOT NULL,
+    mes INT NOT NULL,
+    ano INT NOT NULL,
+PRIMARY KEY(timeid)
+);
+
+CREATE TABLE IF NOT EXISTS d_utilizador(
+  userid INT NOT NULL  AUTO_INCREMENT,
+    email VARCHAR(255) NOT NULL,
+    nome VARCHAR(255) NOT NULL,
+    pais VARCHAR(45) NOT NULL,
+    categoria VARCHAR(45) NOT NULL,
+PRIMARY KEY (userid)
+);
+
+INSERT INTO d_utilizador(userid, email, nome, pais, categoria)
+SELECT utilizador.userid, utilizador.email, utilizador.nome, utilizador.pais, utilizador.categoria
+FROM utilizador;
+
+INSERT INTO d_tempo (dia, mes, ano)
+SELECT DAY(moment), MONTH(moment), YEAR(moment)
+FROM login;
 
 # Misc Queries
 -- Quais sao as paginas sem registos?
