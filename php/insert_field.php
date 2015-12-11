@@ -38,7 +38,7 @@ function update_field_table($dbh, $field_name, $cnt_seq, $is_active, $typecont) 
 
 if (is_logged_in()) {
     show_header();
-    
+
     if(isset($_POST['field_name'])) {
         $field_name = $_POST['field_name'];
         $typecnt=$_POST['typecnt'];
@@ -47,46 +47,47 @@ if (is_logged_in()) {
             $dbh->beginTransaction();
             $cnt_seq = update_sequencia_table($dbh);
             update_field_table($dbh, $field_name, $cnt_seq, 1,$typecnt);
-            $dbh->commit();       
+            $dbh->commit();
         } catch (PDOException $e) {
             echo('<p>ERROR: {' . $e->getMessage() . '}</p>');
         }
- 
-        $dbh = null; 
-        
+
+        $dbh = null;
+
     }
     else{
 ?>
 
-<p> Insert new field </p>
+<p> Insert new field in registry type</p>
 <form method = "post" action = "<?php echo $_SERVER['PHP_SELF']; ?>">
-<?php 
+<?php
 if(!isset($_POST['typecnt'])){ ?>
+tipo de registo:
 <select name="typecnt">
-	<?php    
-		$dbh=get_database_handler();
-		$query='SELECT typecnt,nome FROM tipo_registo WHERE userid=?;';
-		$result=$dbh->prepare($query);
-		$result->execute(array(get_logged_in_userid()));
-		foreach($result as $option){
-			echo("<option value=".$option['typecnt'].">".$option['nome']."</option>");
-		}
-	?>
+    <?php
+        $dbh=get_database_handler();
+        $query='SELECT typecnt,nome FROM tipo_registo WHERE userid=?;';
+        $result=$dbh->prepare($query);
+        $result->execute(array(get_logged_in_userid()));
+        foreach($result as $option){
+            echo("<option value=".$option['typecnt'].">".$option['nome']."</option>");
+        }
+    ?>
 </select>
-<?php 
+<?php
 }
 ?>
 <fieldset>
     <label for="page_name">Name:</label>
     <input type="text" id="field_name" name="field_name" value="" /> <br />
-    <input type="submit" name="submit" value="Add Field <?php 
-										if(isset($_POST['typecnt']))
-											echo("to ".$_REQUEST['typecnt'])?>" />
+    <input type="submit" name="submit" value="Add Field <?php
+                                        if(isset($_POST['typecnt']))
+                                            echo("to ".$_REQUEST['typecnt'])?>" />
 </fieldset>
 </form>
- 
+
 <?php
-	}
+    }
 } else {
     redirect_to_login();
 }

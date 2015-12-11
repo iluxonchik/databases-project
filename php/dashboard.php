@@ -12,7 +12,7 @@ if(is_logged_in()) {
 <a href="newpage.php"> Insert new page</a> <br/>
 <a href="new_registry.php"> Insert new registry</a> <br/>
 <a href="view_registry_types.php"> Registry types</a> <br/>
-<a href="#"> Insert new fields for registry </a> <br/>
+<a href="insert_field.php"> Insert new fields for registry type </a> <br/>
 <a href="pages.php"> Remove page</a> <br/>
 <a href="view_registry_types.php"> Remove registry type</a> <br/>
 <a href="insert_registry.php"> Insert new registry</a> <br/>
