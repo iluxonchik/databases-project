@@ -153,6 +153,23 @@ function get_new_reg_type_typecnt($dbh) {
     return ($new_typecnt == null) ? 1 : $new_typecnt + 1;
 }
 
+function get_max_campo_campocnt($dbh) {
+    $query = 'SELECT campocnt FROM campo ORDER BY campocnt DESC LIMIT 1;';
+    $sth = $dbh->prepare($query);
+    $sth->execute();
+    if ($sth->rowCount()) {
+       $row = $sth->fetch(PDO::FETCH_ASSOC);
+       return $row['campocnt'];
+    } else {
+        return null; // empty table
+    }
+}
+
+function get_new_campo_campocnt($dbh) {
+    $new_campocnt = get_max_campo_campocnt($dbh);
+    return ($new_campocnt == null) ? 1 : $new_campocnt + 1;
+}
+
 function get_max_seq_counter($dbh) {
     $query = 'SELECT contador_sequencia FROM sequencia ORDER BY contador_sequencia DESC LIMIT 1;';
     $sth = $dbh->prepare($query);

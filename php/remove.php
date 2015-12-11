@@ -4,7 +4,7 @@ Used for general removal of stuff, based on $_GET['type']
 
 $_GET['type'] == 1 -> remove page with id $_GET['id']
 $_GET['type'] == 2 -> remove registry type with id $_GET['id']
-$_GET['type'] == 3 -> remove field registry type with registry     //// WTF?
+$_GET['type'] == 3 -> remove campo from registry type      /// typecnt=?&campocnt=?
     type id $_GET['id'] and field if $_GET['id_field']
 
 **************************************************************/
@@ -15,6 +15,7 @@ define('REDIRECT_MSG', 'Redirecting to previous page... <a href="' . get_prev_ur
 '">Click here</a> if that doesen\'t happpen in ' . REDIRECT_DELTA . ' seconds.');
 define('SUCCESS_MSG', '<p> Page removed successfuly! </p>' . '<p>' . REDIRECT_MSG . '</p>');
 define('SUCCESS_MSG_REG_TYPE', '<p> Registry type removed successfuly! </p>' . '<p>' . REDIRECT_MSG . '</p>');
+define('SUCCESS_MSG_CAMPO', '<p> Campo removed successfuly! </p>' . '<p>' . REDIRECT_MSG . '</p>');
 define('TYPE_ERR_MSG', '<p> ERROR: Type not set </p> <br />' . '<p>' . REDIRECT_MSG . '</p>');
 
 function insert_new_sequencia($dbh) {
@@ -89,6 +90,20 @@ function update_reg_type_info($dbh, $params) {
     $params['typecnt'], $params['userid']));
 }
 
+
+function update_campo_info($dbh, $params) {
+    $idseq = insert_new_sequencia($dbh);
+    if ($idseq == null) {
+        $idseq = 1;
+    }
+    $query = 'UPDATE campo
+              SET idseq = ?, ativo = ?, pcampocnt = ?
+              WHERE typecnt = ? AND campocnt = ? AND userid = ?;';
+    $sth = $dbh->prepare($query);
+    $sth->execute(array($idseq, 0, $params['pcampocnt'],
+    $params['typecnt'], $params['campocnt'], $params['userid']));
+}
+
 function handle_page_removal() {
     if(isset($_GET['id'])) {
        $id = $_GET['id'];
@@ -109,9 +124,6 @@ function handle_page_removal() {
     redirect_with_message(get_prev_url(), SUCCESS_MSG, REDIRECT_DELTA);
 }
 
-function handle_reg_removal() {
-    // TODO
-}
 
 
 function clone_reg_type($dbh, $id) {
@@ -142,6 +154,60 @@ function clone_reg_type($dbh, $id) {
         'ptypecnt' => $new_typecnt
     );
 }
+
+
+function clone_campo($dbh, $typecnt, $campocnt) {
+    $orig_idseq = null;
+    // Get values to clone
+    $query = 'SELECT userid, typecnt, campocnt, idseq, ativo, nome, pcampocnt FROM campo
+            WHERE userid = ? AND typecnt = ? AND campocnt = ? LIMIT 1;';
+    $sth = $dbh->prepare($query);
+    $sth->execute(array(get_logged_in_userid(), $typecnt, $campocnt));
+    if($sth->rowCount()) {
+        $row = $sth->fetch(PDO::FETCH_ASSOC);
+        $userid = $row['userid'];
+        $typecnt = $row['typecnt'];
+        $campocnt = $row['campocnt'];
+        $orig_idseq = $idseq = $row['idseq'];
+        $ativo = $row['ativo'];
+        $nome = $row['nome'];
+        $pcampocnt = $row['pcampocnt'];
+    }
+    $query = 'INSERT INTO campo (userid, typecnt, campocnt, idseq, ativo, nome, pcampocnt) VALUES (?, ?, ?, ?, ?, ?, ?);';
+    $sth = $dbh->prepare($query);
+    $new_campocnt = get_new_campo_campocnt($dbh);
+    $sth->execute(array($userid, $typecnt, $new_campocnt, $idseq, 0, $nome, $pcampocnt));
+
+    return array(
+        'userid' => $userid,
+        'typecnt' => $typecnt,
+        'campocnt' => $campocnt,
+        'ativo' => $ativo, // TODO: null check
+        'pcampocnt' => $new_campocnt
+    );
+}
+
+function handle_reg_field_campo_removal() {
+    if(isset($_GET['typecnt']) && isset($_GET['campocnt'])) {
+       $typecnt = $_GET['typecnt'];
+       $campocnt = $_GET['campocnt'];
+       $dbh = get_database_handler();
+       try {
+           $dbh->beginTransaction();
+           $params = clone_campo($dbh, $typecnt, $campocnt);
+           update_campo_info($dbh, $params);
+           $dbh->commit();
+
+       } catch (PDOException $e) {
+            echo('<p>ERROR: {' . $e->getMessage() . '}</p>');
+       }
+       $dbh = null;
+    } else {
+
+    }
+    redirect_with_message(get_prev_url(), SUCCESS_MSG_CAMPO, REDIRECT_DELTA);
+}
+
 
 function handle_reg_type_removal() {
     if(isset($_GET['id'])) {
@@ -180,8 +246,8 @@ if(is_logged_in()) {
             handle_reg_type_removal();
             break;
         case 3:
-            // Remove field registry type    WTF?
-            handle_reg_field_removal(); //    WTF?
+            // Remove campo from registry type
+            handle_reg_field_campo_removal(); //    WTF?
             break;
     }
 

@@ -6,6 +6,7 @@ if(is_logged_in()) {
 } else {
     redirect_to_login();
 }
+$remove_url = get_curr_dir() . "/remove.php?type=3&typecnt=";
 ?>
 
 
@@ -24,6 +25,7 @@ GROUP BY c.nome;';
             echo("<tr>\n");
             echo("<th>campocnt</th>");
             echo("<th>nome</th>");
+            echo("<th></th>");
             echo("</tr>\n");
 
             foreach($sth as $row)
@@ -32,6 +34,7 @@ GROUP BY c.nome;';
                 //echo("<td>{$row['idregpag']}</td>\n");
                 echo("<td>{$row['campocnt']}</td>\n");
                 echo("<td>{$row['nome']}</td>\n");
+                echo("<td>".generate_anchor('Remover', $remove_url . $row['typecnt']."&campocnt=".$row['campocnt'])."</td>\n");
                 echo("</tr>\n");
             }
             echo("</table>\n");
