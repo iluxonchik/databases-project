@@ -153,4 +153,26 @@ function get_new_seq_counter($dbh) {
     return ($new_seqcounter == null) ? 1 : $new_seqcounter + 1;
 }
 
+function update_sequencia_table($dbh) {
+        $query = "SELECT contador_sequencia FROM sequencia ORDER BY contador_sequencia DESC LIMIT 1";
+        $sth = $dbh->prepare($query);
+
+        $sth->execute();
+        if($sth->rowCount()) {
+            $row = $sth->fetch(PDO::FETCH_ASSOC);
+            $cnt_seq = $row['contador_sequencia'] + 1;
+        } else {
+            // Table empty, use id 1
+            $cnt_seq = 1;
+        }
+
+        $query = "INSERT INTO sequencia(contador_sequencia, moment, userid) VALUES(?, ?, ?);";
+        $timestamp = get_curr_timestamp();
+        $userid = get_logged_in_userid(); // TODO: null check
+        $sth = $dbh->prepare($query);
+        $sth->execute(array($cnt_seq, $timestamp, $userid));
+
+        return $cnt_seq;
+}
+
 ?>
