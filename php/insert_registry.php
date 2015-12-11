@@ -35,28 +35,6 @@ function update_register_table($dbh, $reg_name, $cnt_seq, $is_active, $typecont)
 
 
 
-function update_sequencia_table($dbh) {
-        $query = "SELECT contador_sequencia FROM sequencia ORDER BY contador_sequencia DESC LIMIT 1";
-        $sth = $dbh->prepare($query);
- 
-        $sth->execute();
-        if($sth->rowCount()) {
-            $row = $sth->fetch(PDO::FETCH_ASSOC);
-            $cnt_seq = $row['contador_sequencia'] + 1;
-        } else {
-            // Table empty, use id 1
-            $cnt_seq = 1;
-        }
-        
-        $query = "INSERT INTO sequencia(contador_sequencia, moment, userid) VALUES(?, ?, ?);";
-        $timestamp = get_curr_timestamp();
-        $userid = get_logged_in_userid(); // TODO: null check
-        $sth = $dbh->prepare($query);
-        $sth->execute(array($cnt_seq, $timestamp, $userid));
-        
-        return $cnt_seq;
-}
-
 
 if (is_logged_in()) {
     show_header();
@@ -95,7 +73,7 @@ Register type:<br><select name="typecnt">
 </select>
 <fieldset>
     <label for="page_name">Register name:</label>
-    <input type="text" id="register_name" name="register_name" value=" " /> <br />
+    <input type="text" id="register_name" name="register_name" value="" /> <br />
     <input type="submit" name="submit" value="Add Register" />
 </fieldset>
 </form>
