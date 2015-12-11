@@ -71,7 +71,7 @@ function update_page_info($dbh, $params) {
               SET idseq = ?, ativa = ?, ppagecounter = ?
               WHERE pagecounter = ? AND userid = ?;';
     $sth = $dbh->prepare($query);
-    $sth->execute(array($idseq, $params['ativa'], $params['ppagecounter'], 
+    $sth->execute(array($idseq, 0, $params['ppagecounter'], 
     $params['pagecounter'], $params['userid']));
 }
 

@@ -64,9 +64,11 @@ if (is_logged_in()) {
         $is_active = parse_is_active();
         
         $dbh = get_database_handler();
-        try {    
+        try {
+            $dbh->query(TRANSACTION_START);
             $cnt_seq = update_sequencia_table($dbh);
-            update_page_table($dbh, $page_name, $cnt_seq, $is_active);       
+            update_page_table($dbh, $page_name, $cnt_seq, $is_active);
+            $dbh->query(TRANSACTION_END);       
         } catch (PDOException $e) {
             echo('<p>ERROR: {' . $e->getMessage() . '}</p>');
         }
