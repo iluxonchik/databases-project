@@ -136,6 +136,23 @@ function get_new_pagina_pagecounter($dbh) {
     return ($new_seqcounter == null) ? 1 : $new_seqcounter + 1;
 }
 
+function get_max_reg_type_typecnt($dbh) {
+    $query = 'SELECT typecnt FROM tipo_registo ORDER BY typecnt DESC LIMIT 1;';
+    $sth = $dbh->prepare($query);
+    $sth->execute();
+    if ($sth->rowCount()) {
+       $row = $sth->fetch(PDO::FETCH_ASSOC);
+       return $row['typecnt'];
+    } else {
+        return null; // empty table
+    }
+}
+
+function get_new_reg_type_typecnt($dbh) {
+    $new_typecnt = get_max_reg_type_typecnt($dbh);
+    return ($new_typecnt == null) ? 1 : $new_typecnt + 1;
+}
+
 function get_max_seq_counter($dbh) {
     $query = 'SELECT contador_sequencia FROM sequencia ORDER BY contador_sequencia DESC LIMIT 1;';
     $sth = $dbh->prepare($query);
